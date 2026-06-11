@@ -23,25 +23,6 @@ The project also covers:
 
 ---
 
-# 🏗️ Architecture
-
-```
-                Client Browser
-                       │
-              HTTPS (443)
-                       │
-               SafeLine WAF
-             Reverse Proxy
-                       │
-              HTTP (8080)
-                       │
-                 Apache2
-                       │
-                    DVWA
-```
-
----
-
 # 🛠️ Technologies Used
 
 - Ubuntu Server
@@ -58,77 +39,201 @@ The project also covers:
 
 ---
 
-# 📁 Project Structure
+# Installation Guide
 
-```
-SafeLine-WAF-DVWA-Lab/
+## Prerequisites
 
-│── README.md
-│── LICENSE
-│── .gitignore
-
-├── configs/
-│     dvwa.conf
-│     ports.conf
-│     hosts-example.txt
-│     ufw-rules.txt
-│
-├── docs/
-│     Project_Report.pdf
-│     Troubleshooting_Report.pdf
-│
-├── screenshots/
-│     architecture.png
-│     apache.png
-│     safeline-dashboard.png
-│     dvwa-login.png
-│     waf-logs.png
-│
-└── commands/
-      useful-commands.md
-```
+* Ubuntu 22.04 LTS (or later)
+* Internet connection
+* User with `sudo` privileges
 
 ---
 
-# ⚙️ Installation
-
-## Clone DVWA
+# 1. Update the System
 
 ```bash
-git clone https://github.com/digininja/DVWA.git
-```
-
-Move DVWA into Apache's web directory.
-
-```
-/var/www/html/DVWA
+sudo apt update
+sudo apt upgrade -y
 ```
 
 ---
 
-## Configure Apache
+# 2. Install Apache
 
-Create a Virtual Host.
-
-Example:
-
-```apache
-<VirtualHost *:8080>
-
-ServerName webserver.thebudbax
-
-DocumentRoot /var/www/html/DVWA
-
-<Directory /var/www/html/DVWA>
-
-AllowOverride All
-
-Require all granted
-
-</Directory>
-
-</VirtualHost>
+```bash
+sudo apt install apache2 -y
 ```
+
+Enable Apache:
+
+```bash
+sudo systemctl enable apache2
+sudo systemctl start apache2
+```
+
+Verify:
+
+```bash
+systemctl status apache2
+```
+
+---
+
+# 3. Install MySQL Server
+
+Install MySQL:
+
+```bash
+sudo apt install mysql-server -y
+```
+
+Enable and start the MySQL service:
+
+```bash
+sudo systemctl enable mysql
+sudo systemctl start mysql
+```
+
+Verify the service is running:
+
+```bash
+sudo systemctl status mysql
+```
+
+Secure the installation:
+
+```bash
+sudo mysql_secure_installation
+```
+
+---
+
+# 4. Install PHP
+
+```bash
+sudo apt install php php-mysql php-gd php-curl php-xml php-mbstring php-zip libapache2-mod-php -y
+```
+
+Verify:
+
+```bash
+php -v
+```
+
+---
+
+# 5. Restart Apache
+
+```bash
+sudo systemctl restart apache2
+```
+
+---
+
+# 6. Download DVWA
+
+Navigate to Apache's web directory:
+
+```bash
+cd /var/www/html
+```
+
+Clone the repository:
+
+```bash
+sudo git clone https://github.com/digininja/DVWA.git
+```
+
+---
+
+# 7. Configure Permissions
+
+```bash
+sudo chown -R www-data:www-data /var/www/html/DVWA
+sudo chmod -R 755 /var/www/html/DVWA
+```
+
+---
+
+# 8. Configure the Database
+
+Login to MySQLDB:
+
+```bash
+sudo mysql
+```
+
+Create the database:
+
+```sql
+CREATE DATABASE dvwa;
+
+CREATE USER 'dvwa'@'localhost' IDENTIFIED BY 'dvwa123';
+
+GRANT ALL PRIVILEGES ON dvwa.* TO 'dvwa'@'localhost';
+
+EXIT;
+```
+
+---
+
+# 9. Configure DVWA
+
+Copy the sample configuration:
+
+```bash
+cd /var/www/html/DVWA/config
+sudo cp config.inc.php.dist config.inc.php
+```
+
+Edit the configuration:
+
+```bash
+sudo nano config.inc.php
+```
+
+Update the database settings:
+
+```php
+$_DVWA['db_server'] = '127.0.0.1';
+$_DVWA['db_database'] = 'dvwa';
+$_DVWA['db_user'] = 'dvwa';
+$_DVWA['db_password'] = 'dvwa123';
+```
+
+Save and exit.
+
+---
+
+# 10. Enable Apache Rewrite Module
+
+```bash
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+---
+
+# 11. Login
+
+Default credentials:
+
+```
+Username: admin
+
+Password: password
+```
+
+---
+
+# Installation Complete
+
+DVWA is now installed and ready to be protected behind SafeLine WAF.
+
+
+---
+
+##TO disable port 80 
 
 Enable the site:
 
@@ -150,6 +255,7 @@ Edit:
 Add:
 
 ```apache
+#Listen 80
 Listen 8080
 ```
 
@@ -157,28 +263,6 @@ Restart Apache.
 
 ```bash
 sudo systemctl restart apache2
-```
-
----
-
-## Configure SafeLine WAF
-
-Create a new application.
-
-Example configuration:
-
-| Setting | Value |
-|---------|-------|
-| Domain | webserver.thebudbax |
-| HTTPS Port | 443 |
-| Upstream | http://192.168.0.111:8080 |
-
----
-
-## Configure Hosts File
-
-```
-192.168.0.111 webserver.thebudbax
 ```
 
 ---
@@ -202,26 +286,6 @@ curl -k -H "Host: webserver.thebudbax" https://127.0.0.1
 # 📸 Screenshots
 
 ## SafeLine Dashboard
-
-*(Insert screenshot here)*
-
----
-
-## Apache Configuration
-
-*(Insert screenshot here)*
-
----
-
-## DVWA Login
-
-*(Insert screenshot here)*
-
----
-
-## WAF Request Logs
-
-*(Insert screenshot here)*
 
 ---
 
@@ -308,18 +372,6 @@ This project helped in understanding:
 - SSL/TLS basics
 - WAF request inspection
 - Secure web application deployment
-
----
-
-# 🚀 Future Improvements
-
-- Integrate ModSecurity
-- Deploy using Nginx
-- Automate deployment using Ansible
-- Add Grafana monitoring
-- Deploy using Docker Compose
-- Configure Let's Encrypt certificates
-- Integrate SIEM logging
 
 ---
 
