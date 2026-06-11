@@ -1,5 +1,7 @@
 # 🛡️ SafeLine WAF + DVWA Lab
 
+![image alt](https://github.com/shreyash2507/Safeline_WAF_project/blob/6b2742c3b7c8f36418b6383b70426c705768a791/Banner.png)
+
 A complete Web Application Firewall (WAF) lab built using **SafeLine WAF**, **Apache2**, and **Damn Vulnerable Web Application (DVWA)** on Ubuntu. The objective of this project was to understand how a reverse proxy WAF protects web applications, how to configure Apache virtual hosts, and how to analyze web traffic through a WAF.
 
 ---
